@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>cirro</title>
+  <meta name="description" content="cirro — above the cirrus.">
+  <meta name="theme-color" content="#0a427e">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="cirro">
+  <link rel="canonical" href="https://cirro-cloud.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cirro-cloud.com/">
+  <meta property="og:title" content="cirro">
+  <meta property="og:description" content="cirro — above the cirrus.">
+  <meta property="og:image" content="https://cirro-cloud.com/poster.jpg">
+  <meta property="og:image:width" content="1920">
+  <meta property="og:image:height" content="1080">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="cirro">
+  <meta name="twitter:description" content="cirro — above the cirrus.">
+  <meta name="twitter:image" content="https://cirro-cloud.com/poster.jpg">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a427e'/%3E%3Cpath d='M4 21c6-8 18-8 24 0' fill='none' stroke='%23fff' stroke-opacity='.45' stroke-width='1.15' stroke-linecap='round'/%3E%3C/svg%3E">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0a427e;
+      background-image: url("poster.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      color: #fff;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      min-height: 100svh;
+    }
+
+    video.bg {
+      position: fixed;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      height: 100svh;
+      object-fit: cover;
+      object-position: center center;
+      pointer-events: none;
+    }
+
+    h1 {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      margin: 0;
+      padding:
+        max(1.5rem, env(safe-area-inset-top, 0px))
+        max(1.5rem, env(safe-area-inset-right, 0px))
+        max(1.5rem, env(safe-area-inset-bottom, 0px))
+        max(1.5rem, env(safe-area-inset-left, 0px));
+      font-family: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, sans-serif;
+      font-weight: 200;
+      font-size: clamp(1.75rem, 2.2vw + 1.15rem, 3.75rem);
+      font-style: normal;
+      letter-spacing: 0.58em;
+      margin-right: -0.58em;
+      line-height: 1;
+      text-transform: lowercase;
+      color: rgba(255, 255, 255, 0.30);
+      text-shadow: 0 0 48px rgba(4, 20, 44, 0.22);
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-select: none;
+      animation: wordmark-in 2.8s ease-out both;
+    }
+
+    @keyframes wordmark-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      h1 { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <video
+    id="bg"
+    class="bg"
+    autoplay
+    muted
+    loop
+    playsinline
+    webkit-playsinline
+    preload="auto"
+    poster="poster.jpg"
+    aria-hidden="true"
+    disablepictureinpicture
+    disableremoteplayback
+  >
+    <source src="hero-mobile.webm" type="video/webm" media="(max-width: 900px)">
+    <source src="hero-mobile.mp4" type="video/mp4" media="(max-width: 900px)">
+    <source src="hero.webm" type="video/webm">
+    <source src="hero.mp4" type="video/mp4">
+  </video>
+  <h1>cirro</h1>
+  <script>
+    (function () {
+      var video = document.getElementById("bg");
+      if (!video) return;
+
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+      function freeze() {
+        video.pause();
+        video.removeAttribute("autoplay");
+        try { video.currentTime = 0; } catch (err) {}
+        video.style.visibility = "hidden";
+      }
+
+      function tryPlay() {
+        if (reduce.matches) {
+          freeze();
+          return;
+        }
+        video.style.visibility = "";
+        var playPromise = video.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch(function () {
+            /* Autoplay blocked (iOS Low Power Mode, etc.). Poster remains. */
+          });
+        }
+      }
+
+      if (reduce.matches) {
+        freeze();
+      } else {
+        tryPlay();
+        video.addEventListener("canplay", tryPlay);
+        document.addEventListener("visibilitychange", function () {
+          if (!document.hidden) tryPlay();
+        });
+        window.addEventListener("pageshow", tryPlay);
+        setTimeout(tryPlay, 300);
+        setTimeout(tryPlay, 1200);
+      }
+
+      if (typeof reduce.addEventListener === "function") {
+        reduce.addEventListener("change", function () {
+          if (reduce.matches) freeze();
+          else tryPlay();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
